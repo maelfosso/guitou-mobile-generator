@@ -8,6 +8,9 @@ import (
 )
 
 // Project keep information 
+// We must add :
+//	- Organisation NAME  as a Title . That title will be used in the package name
+// Then the project name can be the subtitle
 type Project struct {
 	ID string `json:"_id"`
 	Name string `json:"name"`
