@@ -8,6 +8,8 @@ import (
 	git "github.com/go-git/go-git/v5"
 	// "github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
+
+	"guitou.cm/mobile/generator/models"
 )
 
 const destCloningRepo string = "/tmp/guitou-mobile"
@@ -18,9 +20,10 @@ func main() {
 	// Cloning the Guitou mobile repository
 	cloningRepo()
 
-	// Download the Project JSON
+	// Load the Project JSON from Asset
+	project := models.NewProjectFromAsset()
 
-
+	
 	// Download the assets related to the project
 	// - icon -> ./assets/icon
 	// - 
@@ -30,6 +33,7 @@ func main() {
 	
 }
 
+// Should go into a packge related to web, http or api
 func cloningRepo() {
 	if _, err := os.Stat(destCloningRepo); !os.IsNotExist(err) {
 		log.Println(fmt.Sprintf("Remove the destination cloning repository"))
