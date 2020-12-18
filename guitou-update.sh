@@ -7,32 +7,32 @@ check_error() {
   fi
 }
 
+printf "\n"
+
 PACKAGE=${1:?"Error. Must set the package ID"}
+PROJECT_NAME=${2:?"Error. Must set the project NAME"}
 REPO="/tmp/guitou-mobile"
 DIR="/tmp/guitou-$PACKAGE"
 
-echo "[Guitou Mobile Generator] Let's start. " ${DIR}
+printf "\t%s\t%s\t%s\n"  "[Guitou Mobile Generator] Let's start. " ${DIR} $PACKAGE
 
 # Delete folder project if it exists
-[ -d "${DIR}" ] \
-  && { rm -rf ${DIR}; echo "[Guitou Mobile Generator] Folder deleted if exists $DIR"; }
+# [ -d "${DIR}" ] \
+#   && { rm -rf ${DIR}; printf "\t%s\n"  "[Guitou Mobile Generator] Folder deleted if exists $DIR"; }
 
-
-# Change the working directory
-cp -r $REPO $DIR
-check_error 1
-echo "[Guitou Mobile Generator] Working directory changed"
+# [ -d "${DIR}" ] \
+#   && { cd $DIR; echo "[Guitou Mobile Generator] Changing Directory"; }
+#   || { printf "\t" "[Guitou Mobile Generator] Directory doesn't exists"; exit 1; }
 
 # Change the app name
 ANDROID_MANIFEST="$DIR/android/app/src/main/AndroidManifest.xml"
-sed "s/Guitou/$PACKAGE/g" $ANDROID_MANIFEST
+printf "\t%s\t%s\n" "[Guitou Mobile Generator] Changing the App Name" $DIR
+# cat $ANDROID_MANIFEST
+
+sed -i "s/Guitou/$PROJECT_NAME/g" $ANDROID_MANIFEST
 check_error 2
-echo "[Guitou Mobile Generator] App name changed"
+printf "\t%s\n"  "[Guitou Mobile Generator] App name changed"
 
-# Change the icon (load in the Splash)
-
-
-# Change the package to cm.guitou.mobile.${PACKAGE}
 
 BASE="$DIR/android/app/src/main/kotlin"
 cd $BASE
@@ -40,7 +40,7 @@ cd $BASE
 NEW_PKG_PATH="cm/guitou/mobile/$PACKAGE/"
 TMP_PKG_PATH="tmp/"
 OLD_PKG_PATH="cm/guitou/android/xorms/"
-echo $NEW_PKG_PATH $OLD_PKG_PATH
+printf "\t%s\n"  $NEW_PKG_PATH $OLD_PKG_PATH
 
 cp -r $OLD_PKG_PATH/ $TMP_PKG_PATH
 rm $OLD_PKG_PATH/*
@@ -55,11 +55,20 @@ grep -rl "cm.guitou.android.xorms" android/* \
   | xargs sed -i "s/cm.guitou.android.xorms/cm.guitou.mobile.$PACKAGE/g"
 
 check_error 3
-echo "[Guitou Mobile Generator] Package name changed"
+printf "\t%s\n"  "[Guitou Mobile Generator] Package name changed"
 
 # Copy the project json data into assets
 
-rm $DIR/assets/project.json && cp ./assets/project.json $DIR/assets/
-check_error 4
-echo "[Guitou Mobile Generator] Asset copied"
+printf "\t%s\n"  "[Guitou Mobile Generator] Deleting Assets"
+if [ -r "$DIR/assets/project.json" ] 
+then
+  # cat "$DIR/assets/project.json"
+  rm $DIR/assets/project.json
+  # cp ./assets/project.json $DIR/assets
 
+  check_error 4
+  printf "\t%s\n"  "[Guitou Mobile Generator] Asset deleted"
+fi
+# rm $DIR/assets/project.json && cp ./assets/project.json $DIR/assets/
+
+exit 0
