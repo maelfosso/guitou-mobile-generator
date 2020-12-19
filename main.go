@@ -9,22 +9,6 @@ import (
 
 const destCloningRepo string = "/tmp/guitou-mobile"
 
-/**
-Project:
-	- id,
-	-
-	* Download JSON (gRPC)
-
-Repository
-	- package
-	- git.PlainOpen
-	-
-	* Cloning
-	* Working on new branch
-	* Modify : Bash + Downloaded JSON File
-	* Commit
-	* Push
-*/
 func main() {
 	fmt.Println("Guitou mobile generator")
 

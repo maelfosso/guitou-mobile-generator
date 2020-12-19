@@ -1,19 +1,19 @@
 package models
 
 import (
-	"os"
-	"log"
-	"io/ioutil"
 	"encoding/json"
+	"io/ioutil"
+	"log"
+	"os"
 )
 
-// Project keep information 
+// Project keep information
 // We must add :
 //	- Organisation NAME  as a Title . That title will be used in the package name
 // Then the project name can be the subtitle
 type Project struct {
-	ID string `json:"_id"`
-	Name string `json:"name"`
+	ID          string `json:"_id"`
+	Name        string `json:"name"`
 	Description string `json:"description"`
 }
 
@@ -21,7 +21,7 @@ type Project struct {
 func NewProjectFromAsset() *Project {
 	jsonFile, err := os.Open("assets/project.json")
 	defer jsonFile.Close()
-	
+
 	if err != nil {
 		log.Println(err)
 	}
@@ -33,4 +33,9 @@ func NewProjectFromAsset() *Project {
 	json.Unmarshal(byteValue, &project)
 
 	return &project
+}
+
+// NewProjectFromID get project from its ID
+func NewProjectFromID(id string) *Project {
+	return nil
 }
