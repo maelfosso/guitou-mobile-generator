@@ -18,6 +18,11 @@ import (
 
 const guitouURL = "https://gitlab.com/guitou-daco-tool/guitou-mobile.git"
 
+var auth http.BasicAuth = http.BasicAuth{
+	Username: "xxxxx",
+	Password: "xxxxx",
+}
+
 // ProjectRepository of Gitlab gitou-mobile for the project
 type ProjectRepository struct {
 	name       string
@@ -54,11 +59,8 @@ func (repo *ProjectRepository) Clone() error {
 	}
 
 	r, err := git.PlainClone(repo.directory, false, &git.CloneOptions{
-		URL: guitouURL,
-		Auth: &http.BasicAuth{
-			Username: "maelfosso",
-			Password: "f170892m",
-		},
+		URL:  guitouURL,
+		Auth: &auth,
 		// ReferenceName: plumbing.ReferenceName("refs/heads/develop"),
 		// SingleBranch: true,
 		Progress: os.Stdout,
@@ -225,10 +227,7 @@ func (repo *ProjectRepository) Commit() error {
 // Push the changes into the Gitlab
 func (repo *ProjectRepository) Push() error {
 	err := repo.repository.Push(&git.PushOptions{
-		Auth: &http.BasicAuth{
-			Username: "maelfosso",
-			Password: "f170892m",
-		},
+		Auth: &auth,
 	})
 	if err != nil {
 		return &ErrorProjectRepository{
