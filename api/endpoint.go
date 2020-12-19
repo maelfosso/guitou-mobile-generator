@@ -11,8 +11,8 @@ type serviceRequest struct {
 }
 
 type serviceResponse struct {
-	Success bool
-	Err     error
+	Success bool  `json:"status,omitempty"`
+	Err     error `json:"error,omitempty"`
 }
 
 func (r serviceResponse) error() error {
@@ -25,9 +25,9 @@ func makeServiceEndpoint(s Service) endpoint.Endpoint {
 
 		status, err := s.Generate(req.ProjectID)
 		if err != nil {
-			return serviceResponse{false, err.Error()}, nil
+			return serviceResponse{false, err}, nil
 		}
 
-		return serviceResponse{status, ""}, nil
+		return serviceResponse{status, nil}, nil
 	}
 }

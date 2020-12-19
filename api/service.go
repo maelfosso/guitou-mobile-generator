@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"log"
 
 	"guitou.cm/mobile/generator/models"
@@ -19,9 +20,12 @@ func NewService() Service {
 	return &service{}
 }
 
+// ErrorNoProjectID is returned when there is no ProjecID parameter
+var ErrorNoProjectID = errors.New("No ProjectID provided")
+
 func (s *service) Generate(projectID string) (bool, error) {
 	if projectID == "" {
-		return false, nil
+		return false, ErrorNoProjectID
 	}
 
 	project := models.NewProjectFromID(projectID)
