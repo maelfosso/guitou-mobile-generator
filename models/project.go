@@ -39,3 +39,8 @@ func NewProjectFromAsset() *Project {
 func NewProjectFromID(id string) *Project {
 	return nil
 }
+
+type Repository interface {
+	Save(project *Project) error
+	Find(id string) (*Project, error)
+}
