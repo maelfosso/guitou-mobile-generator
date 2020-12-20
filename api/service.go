@@ -28,7 +28,8 @@ func (s *service) Generate(projectID string) (bool, error) {
 		return false, ErrorNoProjectID
 	}
 
-	project := models.NewProjectFromID(projectID)
+	// project := models.NewProjectFromID(projectID)
+	project := models.NewProjectFromAsset()
 
 	repository := models.NewProjectRepository(project)
 

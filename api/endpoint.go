@@ -6,28 +6,28 @@ import (
 	"github.com/go-kit/kit/endpoint"
 )
 
-type serviceRequest struct {
+type generateRequest struct {
 	ProjectID string
 }
 
-type serviceResponse struct {
+type generateResponse struct {
 	Success bool  `json:"status,omitempty"`
 	Err     error `json:"error,omitempty"`
 }
 
-func (r serviceResponse) error() error {
+func (r generateResponse) error() error {
 	return r.Err
 }
 
-func makeServiceEndpoint(s Service) endpoint.Endpoint {
+func makeGenerateEndpoint(s Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(serviceRequest)
+		req := request.(generateRequest)
 
 		status, err := s.Generate(req.ProjectID)
 		if err != nil {
-			return serviceResponse{false, err}, nil
+			return generateResponse{false, err}, nil
 		}
 
-		return serviceResponse{status, nil}, nil
+		return generateResponse{status, nil}, nil
 	}
 }

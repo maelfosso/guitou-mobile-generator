@@ -3,20 +3,22 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"guitou.cm/mobile/generator/models"
 )
 
-func decodeGenerateRequest(_ context.Context, r *http.Request, pam map[string]string) (interface{}, error) {
-	if id, ok := pam["id"]; ok {
-		return serviceRequest{
+func decodeGenerateRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+
+	if id, ok := vars["id"]; ok {
+		return generateRequest{
 			ProjectID: id,
 		}, nil
 	}
 
-	return nil, errors.New("No ProjectID found")
+	return nil, ErrorNoProjectID // errors.New("No ProjectID found")
 }
 
 func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
