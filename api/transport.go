@@ -33,7 +33,7 @@ func encodeResponse(_ context.Context, w http.ResponseWriter, response interface
 		return nil
 	}
 
-	if e, ok := response.(models.ErrorProjectRepository); ok && e.Err != nil {
+	if e, ok := response.(models.ErrorProjectOnGit); ok && e.Err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -54,7 +54,7 @@ func encodeError(response interface{}, w http.ResponseWriter) {
 			"error": e.Error(),
 		})
 	} else {
-		if e, ok := response.(models.ErrorProjectRepository); ok && e.Err != nil {
+		if e, ok := response.(models.ErrorProjectOnGit); ok && e.Err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 
 			json.NewEncoder(w).Encode(map[string]interface{}{

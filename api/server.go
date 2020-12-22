@@ -5,11 +5,18 @@ import (
 
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
+
+	"guitou.cm/mobile/generator/db"
+	"guitou.cm/mobile/generator/repositories"
 )
 
 // NewHTTPServer creates an HTTP server
-func NewHTTPServer() http.Handler {
-	svc := NewService()
+func NewHTTPServer(dbConnexion *db.MongoDBClient) http.Handler {
+
+	projectRepository := repositories.NewProjectRepository(dbConnexion)
+	// generateRepository, err := NewGenerateRepository(dbConnexion)
+
+	svc := NewService(projectRepository) //, generateRepository)
 
 	r := mux.NewRouter()
 

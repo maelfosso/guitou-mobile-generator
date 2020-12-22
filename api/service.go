@@ -13,11 +13,14 @@ type Service interface {
 }
 
 type service struct {
+	projectRepository models.ProjectRepository
 }
 
 // NewService generate service object
-func NewService() Service {
-	return &service{}
+func NewService(projectRepository models.ProjectRepository) Service {
+	return &service{
+		projectRepository,
+	}
 }
 
 // ErrorNoProjectID is returned when there is no ProjecID parameter
@@ -30,8 +33,9 @@ func (s *service) Generate(projectID string) (bool, error) {
 
 	// project := models.NewProjectFromID(projectID)
 	project := models.NewProjectFromAsset()
+	s.projectRepository.Save(project)
 
-	repository := models.NewProjectRepository(project)
+	repository := models.NewProjectOnGit(project)
 
 	log.Println("Cloning...")
 	err := repository.Clone()
