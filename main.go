@@ -3,23 +3,14 @@ package main
 import (
 	"log"
 	"net/http"
-	"time"
-
-	"guitou.cm/mobile/generator/api"
-	"guitou.cm/mobile/generator/db"
 )
 
 func main() {
 	log.Println("Guitou mobile generator")
 
-	dbConnexion := db.Init()
+	server := NewHttpServer()
 
-	srv := &http.Server{
-		Handler:      api.NewHTTPServer(dbConnexion),
-		Addr:         "0.0.0.0:8080",
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
+	if err := http.ListenAndServe(":8000", server); err != nil {
+		log.Fatal("could not listen on port 5000 %w")
 	}
-
-	log.Fatal(srv.ListenAndServe())
 }
