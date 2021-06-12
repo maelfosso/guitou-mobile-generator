@@ -23,9 +23,3 @@ func main() {
 
 	log.Fatal(srv.ListenAndServe())
 }
-
-// TODO
-// 1. GO-Kit example Cargo Shipping: Repository usage
-// 2. SSH for Gitlab Clone
-// 3. gRPC Client from golang to Request a Microservice
-// 4. MongoDB Database integration
