@@ -1,9 +1,11 @@
 package services
 
 import (
-	"github.com/go-kit/kit/transport/grpc"
-	"github.com/golang/protobuf/protoc-gen-go/grpc"
+	"log"
+
+	"google.golang.org/grpc"
 	"guitou.cm/mobile/generator/models"
+	"guitou.cm/mobile/generator/protos"
 )
 
 type IProjectClient interface {
@@ -11,13 +13,28 @@ type IProjectClient interface {
 }
 
 type gRPCProjectClient struct {
-	cc grpc.Client
+	conn grpc.Client
 }
 
 func (g gRPCProjectClient) isProjectExists(id string) (*models.Project, error) {
-	return nil
+	return nil, nil
 }
 
+const (
+	PROJECT_MSVC_GRPC = "project-api:50051"
+)
+
 func NewGrpcProjectClient() IProjectClient {
-	return &gRPCProjectClient{}
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithBloc())
+
+	conn, err := grpc.Dial(PROJECT_MSVC_GRPC, opts...)
+	if err != nil {
+		log.Fatalf("fail to dial [project-api] grpc server: %v", err)
+	}
+
+	return &gRPCProjectClient{
+		conn: protos.NewProjectsClient(conn),
+	}
 }
