@@ -6,13 +6,13 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
-	"guitou.cm/mobile/generator/models"
+	"guitou.cm/mobile/generator/protos"
 )
 
 type IMobileAPP interface {
 	CloneBoilerplate(projectID string) error
 	CreateBranch(projectID string) error
-	Update(project *models.Project) error
+	Update(project *protos.ProjectReply) error // *models.Project) error
 	Commit() error
 	Push() error
 }
@@ -67,7 +67,7 @@ func (r MobileAPP) CreateBranch(projectID string) error {
 }
 
 // Update the project folder with data from the downloaded project
-func (r MobileAPP) Update(project *models.Project) error {
+func (r MobileAPP) Update(project *protos.ProjectReply) error { // *models.Project) error {
 	return nil
 }
 

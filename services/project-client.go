@@ -1,40 +1,40 @@
 package services
 
 import (
-	"log"
+	"fmt"
 
 	"google.golang.org/grpc"
-	"guitou.cm/mobile/generator/models"
 	"guitou.cm/mobile/generator/protos"
 )
 
-type IProjectClient interface {
-	isProjectExists(id string) (*models.Project, error)
-}
+// type IProjectClient interface {
+// 	isProjectExists(id string) (*models.Project, error)
+// }
 
-type gRPCProjectClient struct {
-	conn grpc.Client
-}
+// type gRPCProjectClient struct {
+// 	client protos.ProjectsClient
+// }
 
-func (g gRPCProjectClient) isProjectExists(id string) (*models.Project, error) {
-	return nil, nil
-}
+// func (g gRPCProjectClient) isProjectExists(id string) (*models.Project, error) {
+// 	return nil, nil
+// }
 
 const (
-	PROJECT_MSVC_GRPC = "project-api:50051"
+	PROJECT_MSVC_GRPC = "projects-api:50051"
 )
 
-func NewGrpcProjectClient() IProjectClient {
+func NewGrpcProjectClient() (protos.ProjectsClient, func() error, error) {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithInsecure())
-	opts = append(opts, grpc.WithBloc())
+	opts = append(opts, grpc.WithBlock())
 
 	conn, err := grpc.Dial(PROJECT_MSVC_GRPC, opts...)
 	if err != nil {
-		log.Fatalf("fail to dial [project-api] grpc server: %v", err)
+		return nil, func() error { return nil }, fmt.Errorf("fail to dial [project-api] grpc server: %v", err)
 	}
 
-	return &gRPCProjectClient{
-		conn: protos.NewProjectsClient(conn),
-	}
+	return protos.NewProjectsClient(conn), conn.Close, nil
+	// &gRPCProjectClient{
+	// 	client: protos.NewProjectsClient(conn),
+	// }
 }

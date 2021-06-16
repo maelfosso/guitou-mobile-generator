@@ -9,8 +9,8 @@ func main() {
 	log.Println("Guitou mobile generator")
 
 	server := NewHttpServer()
-
-	if err := http.ListenAndServe(":8000", server); err != nil {
-		log.Fatal("could not listen on port 5000 %w")
-	}
+	log.Fatal(http.ListenAndServe(":8000", server))
+	// if err := http.ListenAndServe(":8000", server); err != nil {
+	// 	log.Fatalf("could not listen on port 8000 %w", err)
+	// }
 }

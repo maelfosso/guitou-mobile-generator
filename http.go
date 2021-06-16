@@ -3,19 +3,20 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
-	"guitou.cm/mobile/generator/models"
+	"guitou.cm/mobile/generator/protos"
 	"guitou.cm/mobile/generator/services"
 )
 
 type HttpServer struct {
 	store         services.IStore
-	projectClient services.IProjectClient
+	projectClient protos.ProjectsClient // services.IProjectClient
 	mobileAPP     services.IMobileAPP
 
 	http.Handler
@@ -33,20 +34,35 @@ func (h HttpServer) JSON(w http.ResponseWriter, status int, data interface{}) {
 
 func NewHttpServer() http.Handler {
 	r := mux.NewRouter()
+	log.Println("NewHttpServer()")
+
+	log.Println("Connecting to gRPC Project")
+	projectClient, _, err := services.NewGrpcProjectClient()
+	if err != nil {
+		log.Fatalf("not possible to connect to Project-API : %v", err)
+	}
+	log.Println("Successful connection to gRPC Project Server")
+	// defer closeProjectClient()
 
 	h := HttpServer{}
 	h.store = services.NewMongoStore()
-	h.projectClient = services.NewGrpcProjectClient()
 	h.mobileAPP = services.NewGitlabMobileAPP()
+	h.projectClient = projectClient
+	// h.Handler = r
 
-	h.Handler = r
+	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		json.NewEncoder(w).Encode(map[string]bool{"ok": true})
+	})
 
-	r.HandleFunc("/generate/{id}", h.GenerateMobileApp)
+	r.NotFoundHandler = r.NewRoute().BuildOnly().HandlerFunc(http.NotFound).GetHandler()
+
+	r.HandleFunc("/{id}", h.GenerateMobileApp).Methods(http.MethodGet)
 
 	loggedRouter := handlers.LoggingHandler(os.Stdout, r)
 	handler := cors.AllowAll().Handler(loggedRouter)
 
-	return handler
+	h.Handler = handler
+	return h
 }
 
 func (h *HttpServer) GenerateMobileApp(w http.ResponseWriter, r *http.Request) {
@@ -54,8 +70,14 @@ func (h *HttpServer) GenerateMobileApp(w http.ResponseWriter, r *http.Request) {
 	pid := vars["id"]
 
 	// Check if the project exists : gRPC - to Project micro-services - ask to project-api msvc
-	var project *models.Project
-	if project, err := h.projectClient.isProjectExists(pid); err != nil {
+	// var project *models.Project
+	// if project, err := h.projectClient.IsProjectExists() isProjectExists(pid); err != nil {
+	var project *protos.ProjectReply
+	idRequest := &protos.IDRequest{
+		Id: pid,
+	}
+	project, err := h.projectClient.IsProjectExists(r.Context(), idRequest)
+	if err != nil {
 		h.JSON(w, http.StatusInternalServerError, fmt.Errorf("error when checking project existance"))
 		return
 	}
@@ -65,19 +87,18 @@ func (h *HttpServer) GenerateMobileApp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Save locally the downloaded project
-	err := h.store.SaveDownloadedProject(project)
-	if err != nil {
+	if err := h.store.SaveDownloadedProject(project); err != nil {
 		h.JSON(w, http.StatusBadRequest, fmt.Errorf("error when saving the downloaded project"))
 		return
 	}
 
 	// Download the repository
-	if err := h.mobileAPP.CloneBoilerplate(project.ID.String()); err != nil {
+	if err := h.mobileAPP.CloneBoilerplate(project.Id); err != nil {
 		h.JSON(w, http.StatusBadRequest, fmt.Errorf("error when cloning boilerplate"))
 		return
 	}
 
-	if err := h.mobileAPP.CreateBranch(project.ID.String()); err != nil {
+	if err := h.mobileAPP.CreateBranch(project.Id); err != nil {
 		h.JSON(w, http.StatusBadRequest, fmt.Errorf("error when updating boilerplate"))
 		return
 	}

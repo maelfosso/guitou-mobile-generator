@@ -2,11 +2,11 @@ package services
 
 import (
 	"go.mongodb.org/mongo-driver/mongo"
-	"guitou.cm/mobile/generator/models"
+	"guitou.cm/mobile/generator/protos"
 )
 
 type IStore interface {
-	SaveDownloadedProject(project *models.Project) error
+	SaveDownloadedProject(project *protos.ProjectReply) error // *models.Project) error
 	LogAppGeneration()
 	GetAllGenerations(id string)
 }
@@ -15,7 +15,7 @@ type mongoStore struct {
 	db mongo.Client
 }
 
-func (s mongoStore) SaveDownloadedProject(project *models.Project) error {
+func (s mongoStore) SaveDownloadedProject(project *protos.ProjectReply) error { // *models.Project) error {
 	return nil
 }
 
