@@ -146,28 +146,35 @@ func (app *MobileAPP) Update(project *protos.ProjectReply) error { // *models.Pr
 	for _, file := range files {
 
 		go func(file string) {
-
 			defer wg.Done()
 
 			filename := filepath.Base(file)
 			log.Printf("\n\n************* %s\n", filename)
 
+			// Create a new file without the extension .tmpl
+			newFilename := strings.TrimSuffix(filename, filepath.Ext((filename)))
+			newFile, err := os.Create(filepath.Join(filepath.Dir(file), newFilename))
+			if err != nil {
+				log.Panic("error when creating the file, ", err)
+			}
+
+			// Run the template
 			t := template.Must(template.New(filename).Funcs(funcMap).ParseFiles(file))
 			if err != nil {
 				log.Panic("error occured", err)
 				// return fmt.Errorf("MAPP_UPDATE_PARSEGLOB_ERROR")
 			}
-			fmt.Println("ParseGlob result: ", t)
-			// fmt.Println(t.Root.Nodes)
-			// fmt.Println(t.ParseName)
-			fmt.Println(t.Templates(), len(t.Templates()))
-			fmt.Println(t.Templates()[0].Name, t.Templates()[0].ParseName)
 
-			err = t.Execute(os.Stdout, project)
-			// err = t.ExecuteTemplate(os.Stdout, project.Id, project)
+			err = t.Execute(newFile, project)
 			if err != nil {
 				log.Println("error occured when executing, ", err)
 				return
+			}
+
+			// Delete the template file
+			err = os.Remove(file)
+			if err != nil {
+				log.Panic("error when deleting, ", err)
 			}
 		}(file)
 	}
