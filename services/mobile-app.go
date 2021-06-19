@@ -116,6 +116,15 @@ func (app *MobileAPP) Commit() error {
 
 // Push the new mobile application ProjectID
 func (app *MobileAPP) Push() error {
+	log.Println("Push start ..................")
+
+	err := app.repository.Push(&git.PushOptions{
+		Auth:       &auth,
+		RemoteName: "origin",
+	})
+	if err != nil && err != git.NoErrAlreadyUpToDate {
+		return fmt.Errorf("MAPP_PUSH_PUSH_ERROR")
+	}
 
 	// At the end, if successful Push, delete the folder projectID
 	return nil

@@ -119,9 +119,10 @@ func (h *HttpServer) GenerateMobileApp(w http.ResponseWriter, r *http.Request) {
 	log.Println("TODO - Committing the update after implementing the Update")
 
 	if err := h.mobileAPP.Push(); err != nil {
-		h.JSON(w, http.StatusBadRequest, fmt.Errorf("error when pushing the mobile application"))
+		h.JSON(w, http.StatusBadRequest, err)
 		return
 	}
+	log.Println("Successful Push")
 
 	h.JSON(w, http.StatusCreated, "link of the play store app")
 }
