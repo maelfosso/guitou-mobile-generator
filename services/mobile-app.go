@@ -89,7 +89,7 @@ func (app *MobileAPP) CreateBranch(projectID string) error {
 
 	err = w.Checkout(&git.CheckoutOptions{
 		Create: true,
-		Branch: plumbing.NewBranchReferenceName(projectID),
+		Branch: plumbing.NewBranchReferenceName(fmt.Sprintf("app-%s", projectID)),
 	})
 	if err != nil {
 		return fmt.Errorf("MAPP_CB_CHECKOUT_ERROR")

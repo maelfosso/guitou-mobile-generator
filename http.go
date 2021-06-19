@@ -104,16 +104,19 @@ func (h *HttpServer) GenerateMobileApp(w http.ResponseWriter, r *http.Request) {
 		h.JSON(w, http.StatusBadRequest, fmt.Errorf("error when updating boilerplate"))
 		return
 	}
+	log.Println("Successful Checkout on new branch")
 
 	if err := h.mobileAPP.Update(project); err != nil {
 		h.JSON(w, http.StatusBadRequest, fmt.Errorf("error when updating boilerplate"))
 		return
 	}
+	log.Println("TODO - Update the project not done yet")
 
 	if err := h.mobileAPP.Commit(); err != nil {
 		h.JSON(w, http.StatusBadRequest, fmt.Errorf("error when committing updated"))
 		return
 	}
+	log.Println("TODO - Committing the update after implementing the Update")
 
 	if err := h.mobileAPP.Push(); err != nil {
 		h.JSON(w, http.StatusBadRequest, fmt.Errorf("error when pushing the mobile application"))
