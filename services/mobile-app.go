@@ -3,7 +3,13 @@ package services
 import (
 	"fmt"
 	"log"
+	"net/mail"
 	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"sync"
+	"text/template"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -108,6 +114,98 @@ func (app *MobileAPP) CreateBranch(projectID string) error {
 
 // Update the project folder with data from the downloaded project
 func (app *MobileAPP) Update(project *protos.ProjectReply) error { // *models.Project) error {
+	log.Println("Update start...")
+
+	var wg sync.WaitGroup
+
+	files, err := WalkMatch(".", "*.tmpl")
+	if err != nil {
+		log.Println("error when WalkMatch, ", err)
+		return fmt.Errorf("MAPP_UPDATE_WALKMATCH_ERROR")
+	}
+	log.Println("WalkMatch : ", files)
+
+	funcMap := template.FuncMap{
+		"toId": func(str string) string {
+			value := strings.ToLower(str)
+
+			if _, err := mail.ParseAddress(value); err == nil {
+				return strings.Split(value, "@")[0]
+			} else {
+				reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+				if err != nil {
+					log.Fatal(err)
+				}
+				return reg.ReplaceAllString(value, "_")
+			}
+		},
+	}
+
+	wg.Add(len(files))
+
+	for _, file := range files {
+
+		go func(file string) {
+
+			defer wg.Done()
+
+			filename := filepath.Base(file)
+			log.Printf("\n\n************* %s\n", filename)
+
+			t := template.Must(template.New(filename).Funcs(funcMap).ParseFiles(file))
+			if err != nil {
+				log.Panic("error occured", err)
+				// return fmt.Errorf("MAPP_UPDATE_PARSEGLOB_ERROR")
+			}
+			fmt.Println("ParseGlob result: ", t)
+			// fmt.Println(t.Root.Nodes)
+			// fmt.Println(t.ParseName)
+			fmt.Println(t.Templates(), len(t.Templates()))
+			fmt.Println(t.Templates()[0].Name, t.Templates()[0].ParseName)
+
+			err = t.Execute(os.Stdout, project)
+			// err = t.ExecuteTemplate(os.Stdout, project.Id, project)
+			if err != nil {
+				log.Println("error occured when executing, ", err)
+				return
+			}
+		}(file)
+	}
+
+	wg.Wait()
+	// t := template.Must(
+	// 	template.New("pubspec.yaml.tmpl").Funcs(template.FuncMap{
+	// 		"toId": func(str string) string {
+	// 			value := strings.ToLower(str)
+
+	// 			if _, err := mail.ParseAddress(value); err == nil {
+	// 				return strings.Split(value, "@")[0]
+	// 			} else {
+	// 				reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+	// 				if err != nil {
+	// 					log.Fatal(err)
+	// 				}
+	// 				return reg.ReplaceAllString(value, "_")
+	// 			}
+	// 		},
+	// 	}).ParseFiles(files...))
+	// if err != nil {
+	// 	log.Println("error occured", err)
+	// 	return fmt.Errorf("MAPP_UPDATE_PARSEGLOB_ERROR")
+	// }
+	// fmt.Println("ParseGlob result: ", t)
+	// // fmt.Println(t.Root.Nodes)
+	// // fmt.Println(t.ParseName)
+	// fmt.Println(t.Templates(), len(t.Templates()))
+	// fmt.Println(t.Templates()[0].Name, t.Templates()[0].ParseName)
+
+	// err = t.Execute(os.Stdout, project)
+	// // err = t.ExecuteTemplate(os.Stdout, project.Id, project)
+	// if err != nil {
+	// 	log.Println("error occured when executing, ", err)
+	// 	return fmt.Errorf("MAPP_UPDATE_EXECUTE_ERROR")
+	// }
+
 	return nil
 }
 
@@ -130,4 +228,26 @@ func (app *MobileAPP) Push() error {
 
 	// At the end, if successful Push, delete the folder projectID
 	return nil
+}
+
+func WalkMatch(root, pattern string) ([]string, error) {
+	var matches []string
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if matched, err := filepath.Match(pattern, filepath.Base(path)); err != nil {
+			return err
+		} else if matched {
+			matches = append(matches, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return matches, nil
 }
