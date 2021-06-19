@@ -24,16 +24,18 @@ type MobileAPP struct {
 }
 
 const (
-	GuitouURL    = "https://gitlab.com/guitou-app/mobile-app-boilerplate"
 	MobileAppDir = "mobile-app-boilerplate"
-	Username     = "maelfosso" // From K8s ENV
-	Password     = "f170892m"  // From K8s ENV
 )
 
-var auth = http.BasicAuth{
-	Username: Username,
-	Password: Password,
-}
+var (
+	GuitouURL = os.Getenv("GIT_REPO_URL")
+	Username  = os.Getenv("GIT_AUTH_USERNAME")
+	Password  = os.Getenv("GIT_AUTH_PASSWORD")
+	auth      = http.BasicAuth{
+		Username: Username,
+		Password: Password,
+	}
+)
 
 func NewGitlabMobileAPP() IMobileAPP {
 	return &MobileAPP{}
