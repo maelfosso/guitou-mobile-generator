@@ -98,6 +98,7 @@ func (h *HttpServer) GenerateMobileApp(w http.ResponseWriter, r *http.Request) {
 		h.JSON(w, http.StatusBadRequest, fmt.Errorf("error when cloning boilerplate"))
 		return
 	}
+	log.Println("Project successfully clone ", h.mobileAPP)
 
 	if err := h.mobileAPP.CreateBranch(project.Id); err != nil {
 		h.JSON(w, http.StatusBadRequest, fmt.Errorf("error when updating boilerplate"))
