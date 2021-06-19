@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/go-git/go-git/v5"
@@ -39,14 +40,18 @@ func NewGitlabMobileAPP() IMobileAPP {
 // Clone the boilerplate of the mobile application
 // Renamed the clone repository with projectID
 func (r MobileAPP) CloneBoilerplate(projectID string) error {
-	if _, err := os.Stat(MobileAppDir); !os.IsNotExist(err) {
-		err := os.RemoveAll(MobileAppDir)
+	if _, err := os.Stat(projectID); !os.IsNotExist(err) {
+		log.Printf("Already clone: [%s] \n", projectID)
+
+		err := os.RemoveAll(projectID)
 		if err != nil {
-			return fmt.Errorf("impossible to delete [%s]", MobileAppDir)
+			return fmt.Errorf("impossible to delete [%s]", projectID)
 		}
+
+		log.Println("Last clone folder removed")
 	}
 
-	_, err := git.PlainClone(MobileAppDir, false, &git.CloneOptions{
+	_, err := git.PlainClone(projectID, false, &git.CloneOptions{
 		URL:      GuitouURL,
 		Auth:     &auth,
 		Progress: os.Stdout,
@@ -55,7 +60,7 @@ func (r MobileAPP) CloneBoilerplate(projectID string) error {
 	// MobileAPP cloned
 
 	if err != nil {
-		return fmt.Errorf("Error occurred when cloning [%s] for [%s]")
+		return fmt.Errorf("error occurred when cloning for [%s]", projectID)
 	}
 
 	return nil

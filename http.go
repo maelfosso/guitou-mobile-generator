@@ -85,6 +85,7 @@ func (h *HttpServer) GenerateMobileApp(w http.ResponseWriter, r *http.Request) {
 		h.JSON(w, http.StatusBadRequest, fmt.Errorf("project does not exists"))
 		return
 	}
+	log.Println("Grpc downloaded Project : \n\t", project)
 
 	// Save locally the downloaded project
 	if err := h.store.SaveDownloadedProject(project); err != nil {
