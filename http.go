@@ -85,6 +85,7 @@ func (h *HttpServer) GenerateMobileApp(w http.ResponseWriter, r *http.Request) {
 		h.JSON(w, http.StatusBadRequest, fmt.Errorf("project does not exists"))
 		return
 	}
+	log.Println("Grpc downloaded Project : \n\t", project)
 
 	// Save locally the downloaded project
 	if err := h.store.SaveDownloadedProject(project); err != nil {
@@ -97,26 +98,31 @@ func (h *HttpServer) GenerateMobileApp(w http.ResponseWriter, r *http.Request) {
 		h.JSON(w, http.StatusBadRequest, fmt.Errorf("error when cloning boilerplate"))
 		return
 	}
+	log.Println("Project successfully clone ", h.mobileAPP)
 
 	if err := h.mobileAPP.CreateBranch(project.Id); err != nil {
 		h.JSON(w, http.StatusBadRequest, fmt.Errorf("error when updating boilerplate"))
 		return
 	}
+	log.Println("Successful Checkout on new branch")
 
 	if err := h.mobileAPP.Update(project); err != nil {
 		h.JSON(w, http.StatusBadRequest, fmt.Errorf("error when updating boilerplate"))
 		return
 	}
+	log.Println("TODO - Update the project not done yet")
 
-	if err := h.mobileAPP.Commit(); err != nil {
+	if err := h.mobileAPP.Commit(project); err != nil {
 		h.JSON(w, http.StatusBadRequest, fmt.Errorf("error when committing updated"))
 		return
 	}
+	log.Println("TODO - Committing the update after implementing the Update")
 
 	if err := h.mobileAPP.Push(); err != nil {
-		h.JSON(w, http.StatusBadRequest, fmt.Errorf("error when pushing the mobile application"))
+		h.JSON(w, http.StatusBadRequest, err)
 		return
 	}
+	log.Println("Successful Push")
 
 	h.JSON(w, http.StatusCreated, "link of the play store app")
 }

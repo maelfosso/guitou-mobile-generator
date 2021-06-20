@@ -18,5 +18,12 @@ message IDRequest {
 message ProjectReply {
   string id = 1;
   string title = 2;
-  string description = 3;
+  string description = 3;  
+  User author = 4;
+}
+
+message User {
+  string id = 1;
+  string name = 2;
+  string email = 3;
 }

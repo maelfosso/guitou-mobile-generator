@@ -1,6 +1,8 @@
 package services
 
 import (
+	"log"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"guitou.cm/mobile/generator/protos"
 )
@@ -16,6 +18,7 @@ type mongoStore struct {
 }
 
 func (s mongoStore) SaveDownloadedProject(project *protos.ProjectReply) error { // *models.Project) error {
+	log.Printf("Save Download Project : \n\t%v\n", project)
 	return nil
 }
 
