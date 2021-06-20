@@ -130,6 +130,8 @@ func (app *MobileAPP) Update(project *protos.ProjectReply) error { // *models.Pr
 			value := strings.ToLower(str)
 
 			if _, err := mail.ParseAddress(value); err == nil {
+				value = strings.ReplaceAll(value, ".", "_")
+
 				return strings.Split(value, "@")[0]
 			} else {
 				reg, err := regexp.Compile("[^a-zA-Z0-9]+")
@@ -164,6 +166,9 @@ func (app *MobileAPP) Update(project *protos.ProjectReply) error { // *models.Pr
 				log.Panic("error occured", err)
 				// return fmt.Errorf("MAPP_UPDATE_PARSEGLOB_ERROR")
 			}
+
+			log.Println("Execute Project ", project)
+			log.Println(project.Author.Id, project.Author.Email)
 
 			err = t.Execute(newFile, project)
 			if err != nil {
