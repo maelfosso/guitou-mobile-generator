@@ -118,7 +118,7 @@ func (h *HttpServer) GenerateMobileApp(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("TODO - Committing the update after implementing the Update")
 
-	if err := h.mobileAPP.Push(); err != nil {
+	if err := h.mobileAPP.Push(project.Id); err != nil {
 		h.JSON(w, http.StatusBadRequest, err)
 		return
 	}

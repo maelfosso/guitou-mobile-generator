@@ -24,7 +24,7 @@ type IMobileAPP interface {
 	CreateBranch(projectID string) error
 	Update(project *protos.ProjectReply) error // *models.Project) error
 	Commit(project *protos.ProjectReply) error
-	Push() error
+	Push(projectID string) error
 }
 
 type MobileAPP struct {
@@ -32,7 +32,8 @@ type MobileAPP struct {
 }
 
 const (
-	MobileAppDir = "mobile-app-boilerplate"
+	MOBILE_APP_FOLDER = "mobile-app-boilerplate"
+	CLONED_APP_FOLDER = "/app-generated"
 )
 
 var (
@@ -52,25 +53,28 @@ func NewGitlabMobileAPP() IMobileAPP {
 // Clone the boilerplate of the mobile application
 // Renamed the clone repository with projectID
 func (app *MobileAPP) CloneBoilerplate(projectID string) error {
-	if _, err := os.Stat(projectID); !os.IsNotExist(err) {
-		log.Printf("Already clone: [%s] \n", projectID)
+	projectIdPath := filepath.Join(CLONED_APP_FOLDER, projectID)
 
-		err := os.RemoveAll(projectID)
+	if _, err := os.Stat(projectIdPath); !os.IsNotExist(err) {
+		log.Printf("Already clone: [%s] \n", projectIdPath)
+
+		err := os.RemoveAll(projectIdPath)
 		if err != nil {
-			return fmt.Errorf("impossible to delete [%s]", projectID)
+			return fmt.Errorf("impossible to delete [%s]", projectIdPath)
 		}
 
 		log.Println("Last clone folder removed")
 	}
 
-	repo, err := git.PlainClone(projectID, false, &git.CloneOptions{
+	repo, err := git.PlainClone(projectIdPath, false, &git.CloneOptions{
 		URL:      GuitouURL,
 		Auth:     &auth,
 		Progress: os.Stdout,
 	})
 
 	if err != nil {
-		return fmt.Errorf("error occurred when cloning for [%s]", projectID)
+		log.Println("Error when cloning : ", err)
+		return fmt.Errorf("error occurred when cloning for [%s]", projectIdPath)
 	}
 
 	app.repository = repo
@@ -82,6 +86,8 @@ func (app *MobileAPP) CloneBoilerplate(projectID string) error {
 
 // Create a new branch having the name app-{projectID}
 func (app *MobileAPP) CreateBranch(projectID string) error {
+	os.Chdir(filepath.Join(CLONED_APP_FOLDER, projectID))
+
 	log.Println("******** [CreateBranch] ******")
 	log.Println(app)
 
@@ -89,7 +95,7 @@ func (app *MobileAPP) CreateBranch(projectID string) error {
 	if err != nil {
 		return fmt.Errorf("MAPP_CB_HEAD_ERROR")
 	}
-	log.Println("Getting the commit being pointed by HEAD : ", ref)
+	log.Println("Getting the commit being pointed by HEAD: ", ref)
 
 	w, err := app.repository.Worktree()
 	if err != nil {
@@ -116,6 +122,8 @@ func (app *MobileAPP) CreateBranch(projectID string) error {
 
 // Update the project folder with data from the downloaded project
 func (app *MobileAPP) Update(project *protos.ProjectReply) error { // *models.Project) error {
+	os.Chdir(filepath.Join(CLONED_APP_FOLDER, project.Id))
+
 	log.Println("Update start...")
 
 	files, err := WalkMatch(".", "*.tmpl")
@@ -192,6 +200,8 @@ func (app *MobileAPP) Update(project *protos.ProjectReply) error { // *models.Pr
 
 // Commit the change from Update
 func (app *MobileAPP) Commit(project *protos.ProjectReply) error {
+	os.Chdir(filepath.Join(CLONED_APP_FOLDER, project.Id))
+
 	log.Println("Commit start ....")
 
 	w, err := app.repository.Worktree()
@@ -224,14 +234,19 @@ func (app *MobileAPP) Commit(project *protos.ProjectReply) error {
 }
 
 // Push the new mobile application ProjectID
-func (app *MobileAPP) Push() error {
-	log.Println("Push start ..................")
+func (app *MobileAPP) Push(projectID string) error {
+	os.Chdir(filepath.Join(CLONED_APP_FOLDER, projectID))
+
+	curr, _ := os.Getwd()
+	log.Println("Push start .................. ", curr)
 
 	err := app.repository.Push(&git.PushOptions{
 		Auth:       &auth,
 		RemoteName: "origin",
+		Force:      true,
 	})
 	if err != nil && err != git.NoErrAlreadyUpToDate {
+		log.Println("An error occurent when pushing : ", err)
 		return fmt.Errorf("MAPP_PUSH_PUSH_ERROR")
 	}
 
