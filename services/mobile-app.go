@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/mail"
@@ -65,10 +66,11 @@ func (app *MobileAPP) CloneBoilerplate(projectID string) error {
 
 		log.Println("Last clone folder removed")
 	}
+	log.Println("*** Let's clone it : ", GuitouURL)
 
 	repo, err := git.PlainClone(projectIdPath, false, &git.CloneOptions{
-		URL:      GuitouURL,
-		Auth:     &auth,
+		URL: GuitouURL,
+		// Auth:     &auth,
 		Progress: os.Stdout,
 	})
 
@@ -105,7 +107,7 @@ func (app *MobileAPP) CreateBranch(projectID string) error {
 
 	err = w.Checkout(&git.CheckoutOptions{
 		Create: true,
-		Branch: plumbing.NewBranchReferenceName(fmt.Sprintf("app-%s", projectID)),
+		Branch: plumbing.NewBranchReferenceName(fmt.Sprintf("app/%s", projectID)),
 	})
 	if err != nil {
 		return fmt.Errorf("MAPP_CB_CHECKOUT_ERROR")
@@ -148,6 +150,10 @@ func (app *MobileAPP) Update(project *protos.ProjectReply) error { // *models.Pr
 				}
 				return reg.ReplaceAllString(value, "_")
 			}
+		},
+		"toMarshal": func(d interface{}) string {
+			a, _ := json.Marshal(d)
+			return string(a)
 		},
 	}
 
