@@ -18,12 +18,25 @@ message IDRequest {
 message ProjectReply {
   string id = 1;
   string title = 2;
-  string description = 3;  
+  string description = 3;
   User author = 4;
+  repeated Xorm xorms = 5;
 }
 
 message User {
   string id = 1;
   string name = 2;
   string email = 3;
+}
+
+message Xorm {
+  string id = 1;
+  string title = 2;
+  string level = 3;
+  string project = 4;
+  XormSettings settings = 5;
+}
+
+message XormSettings {
+  
 }
