@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"os"
 
 	"google.golang.org/grpc"
 	"guitou.cm/mobile/generator/protos"
@@ -19,8 +20,8 @@ import (
 // 	return nil, nil
 // }
 
-const (
-	PROJECT_MSVC_GRPC = "projects-api:50051"
+var (
+	PROJECT_GRPC_SERVER = os.Getenv("PROJECT_GRPC_SERVER") // "projects-api:50051"
 )
 
 func NewGrpcProjectClient() (protos.ProjectsClient, func() error, error) {
@@ -28,7 +29,7 @@ func NewGrpcProjectClient() (protos.ProjectsClient, func() error, error) {
 	opts = append(opts, grpc.WithInsecure())
 	opts = append(opts, grpc.WithBlock())
 
-	conn, err := grpc.Dial(PROJECT_MSVC_GRPC, opts...)
+	conn, err := grpc.Dial(PROJECT_GRPC_SERVER, opts...)
 	if err != nil {
 		return nil, func() error { return nil }, fmt.Errorf("fail to dial [project-api] grpc server: %v", err)
 	}

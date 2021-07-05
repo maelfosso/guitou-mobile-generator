@@ -57,7 +57,7 @@ func (app *MobileAPP) CloneBoilerplate(projectID string) error {
 	projectIdPath := filepath.Join(CLONED_APP_FOLDER, projectID)
 
 	if _, err := os.Stat(projectIdPath); !os.IsNotExist(err) {
-		log.Printf("Already clone: [%s] \n", projectIdPath)
+		log.Printf("Already clone: [%s] \n %s", projectIdPath, err)
 
 		err := os.RemoveAll(projectIdPath)
 		if err != nil {

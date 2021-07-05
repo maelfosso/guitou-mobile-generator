@@ -3,4 +3,3 @@ build-proto:
 
 build:
 	go build -o bin/main *.go
-
