@@ -201,6 +201,11 @@ func (app *MobileAPP) Update(project *protos.ProjectReply) error { // *models.Pr
 
 	wg.Wait()
 
+	// Move the application to new folder
+	// 1. Create folder android/app/src/main/kotlin/cm.guitou.mobile.{{ .Author.Email | toId }}.p{{ .Id }} (. par /)
+	// 2. Move MainActivity.kt into that new folder
+	// 3. Delete the empty folder android/app/src/main/kotlin/cm/guitou/mobile/evaluation_des_radios_communautaires
+
 	return nil
 }
 
